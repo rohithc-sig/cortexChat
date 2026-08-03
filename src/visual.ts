@@ -1,3 +1,6 @@
+/// <reference path="./typings.d.ts" />
+
+
 "use strict";
 
 import powerbi from "powerbi-visuals-api";
@@ -20,7 +23,8 @@ export class Visual implements IVisual {
     private target: HTMLElement;
     private app: App;
 
-    private formattingSettings: VisualFormattingSettingsModel;
+    // <-- Added ! here
+    private formattingSettings!: VisualFormattingSettingsModel;
     private formattingSettingsService: FormattingSettingsService;
 
     constructor(options: VisualConstructorOptions) {
@@ -34,9 +38,10 @@ export class Visual implements IVisual {
 
         this.app = new App();
 
-        this.target.innerHTML = this.app.render();
-        this.app.initialize();
+        this.target.replaceChildren();
+        this.target.appendChild(this.app.render());
 
+        this.app.initialize();
     }
 
     public update(options: VisualUpdateOptions): void {
@@ -46,7 +51,6 @@ export class Visual implements IVisual {
         try {
 
             console.log("Visual Updated");
-
             console.log(options);
 
             if (options.dataViews && options.dataViews.length > 0) {
@@ -56,7 +60,6 @@ export class Visual implements IVisual {
                         VisualFormattingSettingsModel,
                         options.dataViews[0]
                     );
-
             }
 
             this.events.renderingFinished(options);
@@ -64,11 +67,8 @@ export class Visual implements IVisual {
         } catch (error) {
 
             console.error(error);
-
             this.events.renderingFailed(options, String(error));
-
         }
-
     }
 
     public getFormattingModel(): powerbi.visuals.FormattingModel {
@@ -76,7 +76,5 @@ export class Visual implements IVisual {
         return this.formattingSettingsService.buildFormattingModel(
             this.formattingSettings
         );
-
     }
-
 }

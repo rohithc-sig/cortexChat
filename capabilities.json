@@ -75,5 +75,12 @@
             }
         }
     ],
-    "privileges": []
+    "privileges": [{
+        "name": "WebAccess",
+        "essential": true,
+        "parameters": [
+            "http://localhost:8000",
+            "https://localhost:8000"
+        ]
+    }]
 }

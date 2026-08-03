@@ -5,8 +5,8 @@ import VisualConstructorOptions = powerbiVisualsApi.extensibility.visual.VisualC
 import DialogConstructorOptions = powerbiVisualsApi.extensibility.visual.DialogConstructorOptions;
 var powerbiKey: any = "powerbi";
 var powerbi: any = window[powerbiKey];
-var cortexChat8B5657D533D74BB4895C43C6965A8025_DEBUG: IVisualPlugin = {
-    name: 'cortexChat8B5657D533D74BB4895C43C6965A8025_DEBUG',
+var cortexChat8B5657D533D74BB4895C43C6965A8025: IVisualPlugin = {
+    name: 'cortexChat8B5657D533D74BB4895C43C6965A8025',
     displayName: 'CortexChat',
     class: 'Visual',
     apiVersion: '5.11.0',
@@ -27,6 +27,6 @@ var cortexChat8B5657D533D74BB4895C43C6965A8025_DEBUG: IVisualPlugin = {
 if (typeof powerbi !== "undefined") {
     powerbi.visuals = powerbi.visuals || {};
     powerbi.visuals.plugins = powerbi.visuals.plugins || {};
-    powerbi.visuals.plugins["cortexChat8B5657D533D74BB4895C43C6965A8025_DEBUG"] = cortexChat8B5657D533D74BB4895C43C6965A8025_DEBUG;
+    powerbi.visuals.plugins["cortexChat8B5657D533D74BB4895C43C6965A8025"] = cortexChat8B5657D533D74BB4895C43C6965A8025;
 }
-export default cortexChat8B5657D533D74BB4895C43C6965A8025_DEBUG;
+export default cortexChat8B5657D533D74BB4895C43C6965A8025;

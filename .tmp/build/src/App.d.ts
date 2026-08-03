@@ -1,4 +1,4 @@
 export declare class App {
-    render(): string;
+    render(): HTMLElement;
     initialize(): void;
 }
