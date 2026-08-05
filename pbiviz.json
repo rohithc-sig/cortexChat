@@ -1,14 +1,14 @@
 {
   "visual": {
-  "name": "cortexChat",
-  "displayName": "CortexChat",
-  "guid": "cortexChat8B5657D533D74BB4895C43C6965A8025",
-  "visualClassName": "Visual",
-  "version": "1.0.0.0",
-  "description": "Interactive Cortex Chat custom visual for Power BI.",
-  "supportUrl": "https://github.com/rohitchinta/cortexChat",
-  "gitHubUrl": "https://github.com/rohitchinta/cortexChat"
-},
+    "name": "cortexChat",
+    "displayName": "CortexChat",
+    "guid": "cortexChat8B5657D533D74BB4895C43C6965A8025",
+    "visualClassName": "Visual",
+    "version": "1.0.0.0",
+    "description": "AI chatbot for Snowflake Cortex Analyst inside Power BI",
+    "supportUrl": "https://github.com/rohithc-sig/cortexChat",
+    "gitHubUrl": "https://github.com/rohithc-sig/cortexChat"
+  },
   "apiVersion": "5.11.1",
   "author": {
     "name": "Rohit Chinta",

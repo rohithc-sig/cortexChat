@@ -75,12 +75,13 @@
             }
         }
     ],
-    "privileges": [{
-        "name": "WebAccess",
-        "essential": true,
-        "parameters": [
-            "http://localhost:8000",
-            "https://localhost:8000"
-        ]
-    }]
+    "privileges": [
+    {
+      "name": "WebAccess",
+      "essential": true,
+      "parameters": [
+        "https://cortexbackend.onrender.com/*"
+      ]
+    }
+    ]
 }

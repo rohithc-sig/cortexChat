@@ -1,177 +1,114 @@
 export class App {
+    private container: HTMLDivElement;
+    private inputField: HTMLInputElement;
+    private sendButton: HTMLButtonElement;
+    private responseArea: HTMLDivElement;
+    private activeContext: any = {};
 
     public render(): HTMLElement {
+        this.container = document.createElement("div");
+        this.container.className = "cortex-chat-container";
+        this.container.style.cssText = "font-family: system-ui, -apple-system, sans-serif; padding: 12px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background-color: #ffffff;";
 
-        const root = document.createElement("div");
-        root.id = "cortex-chat";
+        this.container.innerHTML = `
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #0284c7; display: flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 8px; height: 8px; background-color: #0284c7; border-radius: 50%;"></span>
+                Snowflake Cortex Bridge
+            </div>
+            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                <input type="text" id="cortex-input" placeholder="Ask Cortex a question..." style="flex: 1; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none;" />
+                <button id="cortex-send" style="padding: 8px 14px; background-color: #0284c7; color: white; border: none; border-radius: 6px; font-weight: 500; font-size: 12px; cursor: pointer; transition: background-color 0.2s;">Ask</button>
+            </div>
+            <div id="cortex-response" style="flex: 1; overflow-y: auto; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-size: 12px; background-color: #f8fafc;">
+                <span style="color: #64748b;">Enter a prompt to query your Snowflake data model. Active Power BI dashboard filters will automatically be included.</span>
+            </div>
+        `;
 
-        // -------------------------
-        // Header
-        // -------------------------
-
-        const header = document.createElement("div");
-        header.className = "chat-header";
-
-        const title = document.createElement("div");
-        title.className = "title";
-        title.textContent = "🧠 Cortex Analyst";
-
-        const subtitle = document.createElement("div");
-        subtitle.className = "subtitle";
-        subtitle.textContent = "Ask questions about your Power BI data";
-
-        header.appendChild(title);
-        header.appendChild(subtitle);
-
-        // -------------------------
-        // Messages
-        // -------------------------
-
-        const messages = document.createElement("div");
-        messages.id = "messages";
-
-        const assistant = document.createElement("div");
-        assistant.className = "assistant-message";
-
-        assistant.appendChild(document.createTextNode("👋 Welcome!"));
-        assistant.appendChild(document.createElement("br"));
-        assistant.appendChild(document.createElement("br"));
-
-        assistant.appendChild(
-            document.createTextNode("I'm your Cortex Analyst Assistant.")
-        );
-
-        assistant.appendChild(document.createElement("br"));
-        assistant.appendChild(document.createElement("br"));
-
-        assistant.appendChild(
-            document.createTextNode("Ask me questions like:")
-        );
-
-        const ul = document.createElement("ul");
-
-        [
-            "Top 10 brands",
-            "Revenue by retailer",
-            "Sales trend"
-        ].forEach(item => {
-
-            const li = document.createElement("li");
-            li.textContent = item;
-            ul.appendChild(li);
-
-        });
-
-        assistant.appendChild(ul);
-        messages.appendChild(assistant);
-
-        // -------------------------
-        // Footer
-        // -------------------------
-
-        const footer = document.createElement("div");
-        footer.className = "chat-footer";
-
-        const input = document.createElement("input");
-        input.id = "chatInput";
-        input.placeholder = "Ask anything...";
-
-        const button = document.createElement("button");
-        button.id = "sendButton";
-        button.textContent = "Send";
-
-        footer.appendChild(input);
-        footer.appendChild(button);
-
-        // -------------------------
-        // Build UI
-        // -------------------------
-
-        root.appendChild(header);
-        root.appendChild(messages);
-        root.appendChild(footer);
-
-        return root;
-
+        return this.container;
     }
 
     public initialize(): void {
+        this.inputField = this.container.querySelector("#cortex-input") as HTMLInputElement;
+        this.sendButton = this.container.querySelector("#cortex-send") as HTMLButtonElement;
+        this.responseArea = this.container.querySelector("#cortex-response") as HTMLDivElement;
 
-        const button = document.getElementById("sendButton") as HTMLButtonElement;
-        const input = document.getElementById("chatInput") as HTMLInputElement;
-        const messages = document.getElementById("messages") as HTMLDivElement;
-
-        button.onclick = async () => {
-
-    const question = input.value.trim();
-
-    if (!question) {
-        return;
+        this.sendButton.addEventListener("click", () => this.handleSend());
+        this.inputField.addEventListener("keypress", (e: KeyboardEvent) => {
+            if (e.key === "Enter") this.handleSend();
+        });
     }
 
-    // -------------------------
-    // User Message
-    // -------------------------
+    // Called dynamically from visual.ts update() on every slicer/data update
+    public updateContext(context: any): void {
+        this.activeContext = context;
+        console.log("App received updated Power BI Context:", this.activeContext);
+    }
 
-    const userMessage = document.createElement("div");
-    userMessage.className = "user-message";
-    userMessage.textContent = question;
+    private async handleSend(): Promise<void> {
+        const question = this.inputField.value.trim();
+        if (!question) return;
 
-    messages.appendChild(userMessage);
+        this.responseArea.innerHTML = `<div style="color: #0284c7; font-weight: 500;"><strong>Thinking...</strong> Querying Cortex Analyst proxy with active dashboard context...</div>`;
 
-    input.value = "";
+        try {
+            const response = await fetch("https://cortexbackend.onrender.com/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    question: question,
+                    pbi_context: this.activeContext
+                })
+            });
 
-    // -------------------------
-    // Thinking Message
-    // -------------------------
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
 
-    const assistantMessage = document.createElement("div");
-    assistantMessage.className = "assistant-message";
-    assistantMessage.textContent = "Thinking...";
+            const data = await response.json();
+            this.renderResults(data);
+        } catch (err: any) {
+            this.responseArea.innerHTML = `<div style="color: #ef4444;"><strong>Error:</strong> ${err.message}</div>`;
+        }
+    }
 
-    messages.appendChild(assistantMessage);
+    private renderResults(data: { answer: string; sql?: string; columns?: string[]; rows?: any[] }): void {
+        // 1. Render Interpretation Text
+        let html = `<div style="margin-bottom: 12px; line-height: 1.5; color: #1e293b;"><strong>Interpretation:</strong><br/>${data.answer.replace(/\n/g, '<br/>')}</div>`;
 
-    messages.scrollTop = messages.scrollHeight;
-
-    try {
-
-        const response = await fetch("http://localhost:8000/chat", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                question: question
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(await response.text());
+        // 2. Render Collapsible SQL
+        if (data.sql) {
+            html += `
+                <details style="margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px; background-color: #ffffff;">
+                    <summary style="cursor: pointer; color: #0284c7; font-weight: 600; font-size: 11px;">View Generated SQL Query</summary>
+                    <pre style="background: #0f172a; color: #38bdf8; padding: 10px; font-size: 11px; border-radius: 4px; overflow-x: auto; margin-top: 6px; font-family: monospace;">${data.sql}</pre>
+                </details>
+            `;
         }
 
-        const result = await response.json();
+        // 3. Render HTML Data Table
+        if (data.columns && data.columns.length > 0 && data.rows && data.rows.length > 0) {
+            html += `
+                <div style="overflow-x: auto; border: 1px solid #cbd5e1; border-radius: 4px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; background-color: #ffffff;">
+                        <thead>
+                            <tr style="background-color: #f1f5f9; color: #334155; font-weight: 600;">
+                                ${data.columns.map(col => `<th style="padding: 8px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #e2e8f0;">${col}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.rows.map((row, idx) => `
+                                <tr style="background-color: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                                    ${data.columns.map(col => `<td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #f1f5f9; color: #0f172a;">${row[col] !== undefined ? row[col] : ''}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } else {
+            html += `<div style="color: #64748b; margin-top: 6px;"><em>No result rows returned.</em></div>`;
+        }
 
-        assistantMessage.innerHTML = `
-            <b>Answer</b><br><br>
-            ${result.answer}
-            <br><br>
-            <details>
-                <summary>Generated SQL</summary>
-                <pre>${result.sql}</pre>
-            </details>
-        `;
-
-    } catch (err: any) {
-
-        console.error("Fetch Error:", err);
-
-    assistantMessage.textContent =
-        `Error: ${err.message}`;
-
+        this.responseArea.innerHTML = html;
     }
-
-    messages.scrollTop = messages.scrollHeight;
-};
-    }
-
 }

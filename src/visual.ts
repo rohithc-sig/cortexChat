@@ -38,9 +38,7 @@ export class Visual implements IVisual {
 
         this.app = new App();
 
-        this.target.replaceChildren();
-        this.target.appendChild(this.app.render());
-
+        this.target.innerHTML = this.app.render();
         this.app.initialize();
     }
 
