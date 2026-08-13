@@ -1,12 +1,10 @@
 export declare class App {
     private container;
-    private inputField;
-    private sendButton;
-    private responseArea;
-    private activeContext;
-    render(): HTMLElement;
-    initialize(): void;
-    updateContext(context: any): void;
-    private handleSend;
-    private renderResults;
+    private pbiContext;
+    constructor(container: HTMLElement);
+    setContext(context: any): void;
+    private renderBaseUI;
+    private attachEvents;
+    private handleAskQuery;
+    private renderResponse;
 }

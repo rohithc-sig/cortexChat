@@ -4,75 +4,43 @@
 "use strict";
 
 import powerbi from "powerbi-visuals-api";
-import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
-
-import "./../style/visual.less";
-import "./../style/chat.less";
-
-import { App } from "./App";
-import { VisualFormattingSettingsModel } from "./settings";
-
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
-import IVisualEventService = powerbi.extensibility.IVisualEventService;
+
+import { App } from "./App";
 
 export class Visual implements IVisual {
-
-    private events: IVisualEventService;
-    private target: HTMLElement;
+    private targetElement: HTMLElement;
     private app: App;
 
-    // <-- Added ! here
-    private formattingSettings!: VisualFormattingSettingsModel;
-    private formattingSettingsService: FormattingSettingsService;
-
     constructor(options: VisualConstructorOptions) {
-
-        console.log("Initializing Cortex Chat Visual");
-
-        this.events = options.host.eventService;
-        this.target = options.element;
-
-        this.formattingSettingsService = new FormattingSettingsService();
-
-        this.app = new App();
-
-        this.target.innerHTML = this.app.render();
-        this.app.initialize();
+        this.targetElement = options.element;
+        // Initialize the UI handler inside the visual container
+        this.app = new App(this.targetElement);
     }
 
-    public update(options: VisualUpdateOptions): void {
+    public update(options: VisualUpdateOptions) {
+        const dataView = options.dataViews && options.dataViews[0];
+        const contextPayload: { categories: Array<{ columnName: string; values: any[] }> } = { categories: [] };
 
-        this.events.renderingStarted(options);
+        // 1. Extract active categories and slicer states from DataView
+        if (dataView && dataView.categorical && dataView.categorical.categories) {
+            const categories = dataView.categorical.categories;
 
-        try {
+            contextPayload.categories = categories.map(cat => {
+                const colName = cat.source.displayName || "Unknown Column";
+                // Get distinct active values passed by Power BI filters/slicers
+                const distinctValues = Array.from(new Set(cat.values));
 
-            console.log("Visual Updated");
-            console.log(options);
-
-            if (options.dataViews && options.dataViews.length > 0) {
-
-                this.formattingSettings =
-                    this.formattingSettingsService.populateFormattingSettingsModel(
-                        VisualFormattingSettingsModel,
-                        options.dataViews[0]
-                    );
-            }
-
-            this.events.renderingFinished(options);
-
-        } catch (error) {
-
-            console.error(error);
-            this.events.renderingFailed(options, String(error));
+                return {
+                    columnName: colName,
+                    values: distinctValues
+                };
+            });
         }
-    }
 
-    public getFormattingModel(): powerbi.visuals.FormattingModel {
-
-        return this.formattingSettingsService.buildFormattingModel(
-            this.formattingSettings
-        );
+        // 2. Pass updated context to App UI
+        this.app.setContext(contextPayload);
     }
 }
