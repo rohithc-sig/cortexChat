@@ -217,6 +217,10 @@ export class App {
                     overflow-y: auto;
                 }
 
+                /* ==============================
+                   TOAST NOTIFICATIONS
+                   ============================== */
+
                 .toast-container {
                     position: absolute;
                     right: 12px;
@@ -228,37 +232,68 @@ export class App {
                     pointer-events: none;
                 }
 
-                .toast {
-                    min-width: 180px;
-                    max-width: 260px;
-                    padding: 10px 12px;
+                .toast,
+                .toast-notification {
+                    min-width: 190px;
+                    max-width: 280px;
+                    padding: 10px 14px;
                     border-radius: 8px;
                     font-size: 11px;
                     font-weight: 600;
-                    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-                    animation: toast-in 0.2s ease-out;
+                    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                    pointer-events: auto;
+                    animation: toast-notification-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    transition: all 0.2s ease;
                 }
 
-                .toast-success {
+                .toast-success,
+                .toast-notification-success {
                     border: 1px solid #86efac;
                     background-color: #f0fdf4;
                     color: #166534;
                 }
 
-                .toast-error {
+                .toast-error,
+                .toast-notification-error {
                     border: 1px solid #fca5a5;
                     background-color: #fef2f2;
                     color: #991b1b;
                 }
 
-                @keyframes toast-in {
+                .toast-info,
+                .toast-notification-info {
+                    border: 1px solid #93c5fd;
+                    background-color: #eff6ff;
+                    color: #1e40af;
+                }
+
+                .toast-notification-fade-out {
+                    animation: toast-notification-out 0.2s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+                }
+
+                @keyframes toast-notification-in {
                     from {
                         opacity: 0;
-                        transform: translateY(8px);
+                        transform: translateY(10px) scale(0.96);
                     }
                     to {
                         opacity: 1;
-                        transform: translateY(0);
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                @keyframes toast-notification-out {
+                    from {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                    to {
+                        opacity: 0;
+                        transform: translateY(10px) scale(0.96);
                     }
                 }
 
@@ -313,20 +348,31 @@ export class App {
                     color: #334155;
                 }
 
+                /* ==============================
+                   TABLE STYLES (STICKY, STRIPED, HOVER)
+                   ============================== */
+
                 .data-table-wrapper {
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid #cbd5e1;
                     border-radius: 8px;
                     overflow-x: auto;
+                    max-height: 300px;
+                    overflow-y: auto;
                     margin-top: 10px;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
                 }
 
                 .data-table {
                     width: 100%;
-                    border-collapse: collapse;
+                    border-collapse: separate;
+                    border-spacing: 0;
                     font-size: 12px;
                 }
 
                 .data-table th {
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
                     text-align: left;
                     padding: 8px 10px;
                     background-color: #f8fafc;
@@ -335,16 +381,113 @@ export class App {
                     border-bottom: 1px solid #e2e8f0;
                     text-transform: uppercase;
                     font-size: 10px;
+                    box-shadow: 0 1px 0 #e2e8f0;
                 }
 
                 .data-table td {
                     padding: 8px 10px;
                     border-bottom: 1px solid #f1f5f9;
                     color: #1e293b;
+                    transition: background-color 0.15s ease;
+                }
+
+                /* Row Striping */
+                .data-table tbody tr {
+                    background-color: #ffffff;
+                    transition: background-color 0.16s ease, box-shadow 0.16s ease;
+                }
+
+                .data-table tbody tr:nth-child(odd) {
+                    background-color: #ffffff;
+                }
+
+                .data-table tbody tr:nth-child(even) {
+                    background-color: #f5f5f5;
+                }
+
+                /* Row Hover */
+                .data-table tbody tr:hover {
+                    background-color: #eaf3ff;
+                    box-shadow: inset 0 0 0 1px #d0e4ff;
+                }
+
+                /* Cell Hover */
+                .data-table td:hover {
+                    background-color: transparent;
                 }
 
                 /* ==============================
-                   DOWNLOAD CSV BUTTON
+                   EXECUTIVE KPI CALLOUT CARDS
+                   ============================== */
+
+                .kpi-cards-container {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                    gap: 10px;
+                    margin: 12px 0;
+                }
+
+                .kpi-card {
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 8px;
+                    padding: 10px 12px;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    transition: transform 0.15s ease, box-shadow 0.15s ease;
+                }
+
+                .kpi-card:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+                }
+
+                .kpi-title {
+                    font-size: 10px;
+                    font-weight: 700;
+                    color: #64748b;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+
+                .kpi-value {
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: #0f172a;
+                    line-height: 1.2;
+                }
+
+                .kpi-subtext {
+                    font-size: 10px;
+                    color: #94a3b8;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+
+                .kpi-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 2px 6px;
+                    border-radius: 12px;
+                    font-size: 10px;
+                    font-weight: 600;
+                }
+
+                .kpi-badge-success {
+                    background-color: #dcfce7;
+                    color: #15803d;
+                }
+
+                .kpi-badge-danger {
+                    background-color: #fee2e2;
+                    color: #991b1b;
+                }
+
+                /* ==============================
+                   DOWNLOAD / COPY BUTTONS
                    ============================== */
 
                 .download-csv-btn,
@@ -845,18 +988,8 @@ export class App {
 
 
         /* ==============================
-           CSV DOWNLOAD
-           ==============================
-
-           IMPORTANT:
-           The CSV button is created dynamically
-           after the backend responds.
-
-           Therefore, we attach ONE click listener
-           to the main visual container instead of
-           attaching a listener directly to the
-           dynamically-created button.
-        */
+           CSV DOWNLOAD & SQL COPY
+           ============================== */
 
         this.container.addEventListener(
             "click",
@@ -1091,16 +1224,6 @@ export class App {
             ) as HTMLElement;
 
 
-        /*
-         * Create the exact payload that will
-         * be sent to the backend.
-         *
-         * This SAME object is:
-         *
-         * 1. Displayed in the blue debug section
-         * 2. Sent to the backend
-         */
-
         const requestPayload = {
 
             question: queryText,
@@ -1231,12 +1354,6 @@ export class App {
                             "Content-Type":
                                 "application/json"
                         },
-
-                        /*
-                         * This is the exact same
-                         * requestPayload displayed
-                         * in the debug section.
-                         */
 
                         body:
                             JSON.stringify(
@@ -1442,14 +1559,6 @@ export class App {
         }
 
 
-        /*
-         * Store the backend data directly on
-         * this particular bot response.
-         *
-         * The dynamically-created CSV button
-         * retrieves this data when clicked.
-         */
-
         const csvText =
             this.buildCsvContent(
                 data.columns || [],
@@ -1573,7 +1682,7 @@ export class App {
 
     private showToast(
         message: string,
-        type: "success" | "error" = "success"
+        type: "success" | "error" | "info" = "success"
     ) {
 
         const toastHost =
@@ -1591,7 +1700,7 @@ export class App {
             );
 
         toast.className =
-            `toast toast-${type}`;
+            `toast toast-${type} toast-notification toast-notification-${type}`;
 
         toast.textContent =
             message;
@@ -1602,7 +1711,8 @@ export class App {
 
         setTimeout(
             () => {
-                toast.remove();
+                toast.classList.add("toast-notification-fade-out");
+                setTimeout(() => toast.remove(), 200);
             },
             2200
         );
@@ -1790,10 +1900,6 @@ export class App {
             );
 
 
-            /*
-             * Create Blob
-             */
-
             const blob =
                 new Blob(
                     [csvContent],
@@ -1804,22 +1910,11 @@ export class App {
                 );
 
 
-            /*
-             * Create temporary URL
-             */
-
             const url =
                 URL.createObjectURL(
                     blob
                 );
 
-
-            /*
-             * Create temporary anchor.
-             * In Power BI / embedded hosts the anchor must be attached
-             * to the live document body, not just the visual container,
-             * otherwise the browser can suppress the download.
-             */
 
             const link =
                 document.createElement(
@@ -1869,17 +1964,6 @@ export class App {
             );
 
 
-            /*
-             * Trigger download using both click methods to maximize
-             * compatibility in embedded browser contexts.
-             */
-
-            /*
-             * Use the browser-managed save flow. Some Power BI hosts
-             * wait longer than 1s to complete the save, so the blob URL
-             * must remain alive long enough for the download to finish.
-             */
-
             if (window.open) {
 
                 window.open(
@@ -1903,11 +1987,6 @@ export class App {
                 )
             );
 
-
-            /*
-             * Cleanup after a slightly longer delay so the browser can
-             * complete the save operation before the blob URL is revoked.
-             */
 
             setTimeout(
                 () => {
@@ -1948,14 +2027,6 @@ export class App {
     private escapeCsvValue(
         value: string
     ): string {
-
-        /*
-         * CSV requires values containing
-         * commas, quotes, or newlines to
-         * be wrapped in double quotes.
-         *
-         * Existing quotes are doubled.
-         */
 
         if (
             value.includes('"') ||
