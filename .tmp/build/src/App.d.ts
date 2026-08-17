@@ -7,6 +7,7 @@ export declare class App {
     private attachEvents;
     private handleAskQuery;
     private renderResponse;
+    private showToast;
     private buildCsvContent;
     private copyTextToClipboard;
     private downloadCsv;

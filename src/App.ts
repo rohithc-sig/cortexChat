@@ -143,17 +143,12 @@ export class App {
                     margin-bottom: 4px;
                 }
 
-                .request-debug-summary {
+                .request-debug-header-row {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
+                    gap: 8px;
                     width: 100%;
-                    cursor: pointer;
-                    list-style: none;
-                }
-
-                .request-debug-summary::-webkit-details-marker {
-                    display: none;
                 }
 
                 .request-debug-title {
@@ -162,6 +157,25 @@ export class App {
                     color: #1d4ed8;
                     letter-spacing: 0.5px;
                     text-transform: uppercase;
+                }
+
+                .request-debug-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .request-debug-toggle,
+                .request-debug-toggle:hover,
+                .request-debug-toggle:active {
+                    border: 1px solid #93c5fd;
+                    background-color: #ffffff;
+                    color: #1d4ed8;
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                    font-size: 9px;
+                    font-weight: 700;
+                    cursor: pointer;
                 }
 
                 .copy-request-btn {
@@ -201,6 +215,51 @@ export class App {
                     word-break: break-word;
                     max-height: 100px;
                     overflow-y: auto;
+                }
+
+                .toast-container {
+                    position: absolute;
+                    right: 12px;
+                    bottom: 12px;
+                    z-index: 99999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    pointer-events: none;
+                }
+
+                .toast {
+                    min-width: 180px;
+                    max-width: 260px;
+                    padding: 10px 12px;
+                    border-radius: 8px;
+                    font-size: 11px;
+                    font-weight: 600;
+                    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+                    animation: toast-in 0.2s ease-out;
+                }
+
+                .toast-success {
+                    border: 1px solid #86efac;
+                    background-color: #f0fdf4;
+                    color: #166534;
+                }
+
+                .toast-error {
+                    border: 1px solid #fca5a5;
+                    background-color: #fef2f2;
+                    color: #991b1b;
+                }
+
+                @keyframes toast-in {
+                    from {
+                        opacity: 0;
+                        transform: translateY(8px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
                 }
 
                 /* ==============================
@@ -451,26 +510,35 @@ export class App {
 
                 <!-- DEBUG REQUEST -->
 
-                <details
-                    class="request-debug-section"
-                    open
-                >
+                <div class="request-debug-section">
 
-                    <summary class="request-debug-summary">
+                    <div class="request-debug-header-row">
 
                         <div class="request-debug-title">
                             REQUEST SENT BY POWER BI
                         </div>
 
-                        <button
-                            id="copyRequestBtn"
-                            class="copy-request-btn"
-                            type="button"
-                        >
-                            Copy
-                        </button>
+                        <div class="request-debug-actions">
 
-                    </summary>
+                            <button
+                                class="request-debug-toggle"
+                                data-action="toggle-debug"
+                                type="button"
+                            >
+                                Hide
+                            </button>
+
+                            <button
+                                id="copyRequestBtn"
+                                class="copy-request-btn"
+                                type="button"
+                            >
+                                Copy
+                            </button>
+
+                        </div>
+
+                    </div>
 
                     <pre
                         id="requestDebugContent"
@@ -482,7 +550,14 @@ export class App {
   }
 }</pre>
 
-                </details>
+                </div>
+
+                <div
+                    id="cortexToast"
+                    class="toast-container"
+                    aria-live="polite"
+                    aria-atomic="true"
+                ></div>
 
 
                 <!-- Chat Scroll View -->
@@ -678,6 +753,36 @@ export class App {
                 "#copyRequestBtn"
             ) as HTMLButtonElement;
 
+        const debugToggleBtn =
+            this.container.querySelector(
+                "[data-action='toggle-debug']"
+            ) as HTMLButtonElement;
+
+        const debugContent =
+            this.container.querySelector(
+                "#requestDebugContent"
+            ) as HTMLElement;
+
+        if (debugToggleBtn && debugContent) {
+
+            debugToggleBtn.addEventListener(
+                "click",
+                () => {
+
+                    const isHidden =
+                        debugContent.hidden;
+
+                    debugContent.hidden =
+                        !isHidden;
+
+                    debugToggleBtn.textContent =
+                        isHidden ? "Hide" : "Show";
+
+                }
+            );
+
+        }
+
 
         if (copyRequestBtn) {
 
@@ -688,19 +793,8 @@ export class App {
                     event.preventDefault();
                     event.stopPropagation();
 
-                    const requestDebugContent =
-                        this.container.querySelector(
-                            "#requestDebugContent"
-                        ) as HTMLElement;
-
-
-                    if (!requestDebugContent) {
-                        return;
-                    }
-
-
                     const textToCopy =
-                        requestDebugContent.textContent || "";
+                        debugContent?.textContent || "";
 
                     const copied =
                         await this.copyTextToClipboard(
@@ -716,6 +810,11 @@ export class App {
                             "copied"
                         );
 
+                        this.showToast(
+                            "Power BI request copied",
+                            "success"
+                        );
+
                         setTimeout(
                             () => {
 
@@ -728,6 +827,13 @@ export class App {
 
                             },
                             1500
+                        );
+
+                    } else {
+
+                        this.showToast(
+                            "Unable to copy Power BI request",
+                            "error"
                         );
 
                     }
@@ -873,8 +979,22 @@ export class App {
                         );
 
                     copyCsvButton.disabled = false;
-                    copyCsvButton.textContent =
-                        copied ? "Copied!" : originalButtonText;
+
+                    if (copied) {
+                        copyCsvButton.textContent =
+                            "Copied!";
+                        this.showToast(
+                            "CSV copied to clipboard",
+                            "success"
+                        );
+                    } else {
+                        copyCsvButton.textContent =
+                            originalButtonText;
+                        this.showToast(
+                            "Unable to copy CSV. Please try again.",
+                            "error"
+                        );
+                    }
 
                     setTimeout(
                         () => {
@@ -928,8 +1048,22 @@ export class App {
                         );
 
                     copySqlButton.disabled = false;
-                    copySqlButton.textContent =
-                        copied ? "Copied!" : originalButtonText;
+
+                    if (copied) {
+                        copySqlButton.textContent =
+                            "Copied!";
+                        this.showToast(
+                            "SQL copied to clipboard",
+                            "success"
+                        );
+                    } else {
+                        copySqlButton.textContent =
+                            originalButtonText;
+                        this.showToast(
+                            "Unable to copy SQL. Please try again.",
+                            "error"
+                        );
+                    }
 
                     setTimeout(
                         () => {
@@ -1433,6 +1567,45 @@ export class App {
 
         chatHistory.scrollTop =
             chatHistory.scrollHeight;
+
+    }
+
+
+    private showToast(
+        message: string,
+        type: "success" | "error" = "success"
+    ) {
+
+        const toastHost =
+            this.container.querySelector(
+                "#cortexToast"
+            ) as HTMLElement | null;
+
+        if (!toastHost) {
+            return;
+        }
+
+        const toast =
+            document.createElement(
+                "div"
+            );
+
+        toast.className =
+            `toast toast-${type}`;
+
+        toast.textContent =
+            message;
+
+        toastHost.appendChild(
+            toast
+        );
+
+        setTimeout(
+            () => {
+                toast.remove();
+            },
+            2200
+        );
 
     }
 
