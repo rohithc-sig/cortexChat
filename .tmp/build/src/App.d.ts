@@ -7,4 +7,10 @@ export declare class App {
     private attachEvents;
     private handleAskQuery;
     private renderResponse;
+    private buildCsvContent;
+    private copyTextToClipboard;
+    private downloadCsv;
+    private escapeCsvValue;
+    private escapeHtml;
+    private getTimestamp;
 }
