@@ -530,6 +530,44 @@ export class App {
                     cursor: pointer;
                 }
 
+                .follow-up-section {
+                    margin-top: 12px;
+                    border: 1px solid #dbeafe;
+                    background-color: #f8fbff;
+                    border-radius: 12px;
+                    padding: 10px 12px;
+                }
+
+                .follow-up-title {
+                    font-size: 9px;
+                    font-weight: 700;
+                    color: #1d4ed8;
+                    letter-spacing: 0.5px;
+                    text-transform: uppercase;
+                    margin-bottom: 8px;
+                }
+
+                .follow-up-list {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+
+                .follow-up-chip {
+                    background-color: #ffffff;
+                    border: 1px solid #bfdbfe;
+                    border-radius: 999px;
+                    padding: 6px 10px;
+                    font-size: 11px;
+                    color: #1d4ed8;
+                    cursor: pointer;
+                    transition: all 0.15s ease;
+                }
+
+                .follow-up-chip:hover {
+                    background-color: #eff6ff;
+                }
+
                 .suggested-section {
                     padding: 8px 16px;
                 }
@@ -668,7 +706,7 @@ export class App {
                                 data-action="toggle-debug"
                                 type="button"
                             >
-                                Hide
+                                Show
                             </button>
 
                             <button
@@ -686,6 +724,7 @@ export class App {
                     <pre
                         id="requestDebugContent"
                         class="request-debug-content"
+                        hidden
                     >{
   "question": "",
   "pbi_context": {
@@ -1141,6 +1180,32 @@ export class App {
                 }
 
 
+                const followUpButton =
+                    target.closest(
+                        '[data-action="follow-up-question"]'
+                    ) as HTMLButtonElement;
+
+
+                if (followUpButton) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const inputEl =
+                        this.container.querySelector(
+                            "#cortexQueryInput"
+                        ) as HTMLInputElement | null;
+
+                    if (inputEl) {
+                        inputEl.value =
+                            followUpButton.dataset.question || "";
+                        inputEl.focus();
+                    }
+
+                    return;
+                }
+
+
                 const copySqlButton =
                     target.closest(
                         '[data-action="copy-sql"]'
@@ -1585,6 +1650,43 @@ export class App {
             "#334155";
 
 
+        const followUpQuestions =
+            Array.isArray(data.follow_up_questions)
+                ? data.follow_up_questions.filter(
+                      (q: any) =>
+                          typeof q === "string" && q.trim()
+                  )
+                : [];
+
+        const followUpHtml =
+            followUpQuestions.length > 0
+                ? `
+                    <div class="follow-up-section">
+                        <div class="follow-up-title">
+                            Follow-up questions
+                        </div>
+                        <div class="follow-up-list">
+                            ${followUpQuestions
+                                .map(
+                                    q => `
+                                        <button
+                                            class="follow-up-chip"
+                                            type="button"
+                                            data-action="follow-up-question"
+                                            data-question="${this.escapeHtml(
+                                                q
+                                            )}"
+                                        >
+                                            ${this.escapeHtml(q)}
+                                        </button>
+                                    `
+                                )
+                                .join("")}
+                        </div>
+                    </div>
+                `
+                : "";
+
         botContent.innerHTML = `
 
             <div>
@@ -1592,6 +1694,8 @@ export class App {
             </div>
 
             ${tableHtml}
+
+            ${followUpHtml}
 
             ${
                 data.sql
