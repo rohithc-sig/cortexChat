@@ -4,6 +4,16 @@
       "displayName": "Context Fields / Categories",
       "name": "category",
       "kind": "Grouping"
+    },
+    {
+      "displayName": "User Email",
+      "name": "userEmail",
+      "kind": "Measure"
+    },
+    {
+      "displayName": "User Region",
+      "name": "userRegion",
+      "kind": "Measure"
     }
   ],
   "dataViewMappings": [
@@ -13,6 +23,20 @@
           "for": {
             "in": "category"
           }
+        },
+        "values": {
+          "select": [
+            {
+              "for": {
+                "in": "userEmail"
+              }
+            },
+            {
+              "for": {
+                "in": "userRegion"
+              }
+            }
+          ]
         }
       }
     }
@@ -22,8 +46,13 @@
       "name": "WebAccess",
       "essential": true,
       "parameters": [
-        "https://cortexbackend.onrender.com"
+        "https://cortexbackend.onrender.com",
+        "http://localhost:8000"
       ]
+    },
+    {
+      "name": "AADAuthentication",
+      "essential": false
     }
   ]
 }

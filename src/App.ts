@@ -1,14 +1,56 @@
+import powerbi from "powerbi-visuals-api";
+import { CHAT_ENDPOINT } from "./backend";
+
+type VisualHost = powerbi.extensibility.visual.IVisualHost;
+
 export class App {
     private container: HTMLElement;
+    private host: VisualHost;
     private pbiContext: any = { categories: [] };
+    private userEmail?: string;
+    private userRegion?: string;
+    private userIdentity: {
+        status: "available" | "unavailable";
+        userId?: string;
+        tenantId?: string;
+        error?: string;
+    } = { status: "unavailable" };
 
-    constructor(container: HTMLElement) {
+    constructor(container: HTMLElement, host: VisualHost) {
         this.container = container;
+        this.host = host;
         this.renderBaseUI();
+        this.loadUserIdentity();
+    }
+
+    private async loadUserIdentity(): Promise<void> {
+        try {
+            const result =
+                await this.host.acquireAADTokenService.acquireAADToken();
+
+            this.userIdentity = {
+                status: "available",
+                userId: result.userInfo?.userId,
+                tenantId: result.userInfo?.tenantId
+            };
+        } catch (error: any) {
+            this.userIdentity = {
+                status: "unavailable",
+                error: error?.message || "Identity unavailable"
+            };
+        }
     }
 
     public setContext(context: any) {
         this.pbiContext = context;
+    }
+
+    public setUserEmail(userEmail?: string) {
+        this.userEmail = userEmail;
+    }
+
+    public setUserRegion(userRegion?: string) {
+        this.userRegion = userRegion;
     }
 
     private renderBaseUI() {
@@ -1289,11 +1331,19 @@ export class App {
             ) as HTMLElement;
 
 
+        await this.loadUserIdentity();
+
         const requestPayload = {
 
             question: queryText,
 
-            pbi_context: this.pbiContext
+            pbi_context: this.pbiContext,
+
+            user_email: this.userEmail,
+
+            user_region: this.userRegion,
+
+            user_identity: this.userIdentity
 
         };
 
@@ -1411,7 +1461,7 @@ export class App {
 
             const response =
                 await fetch(
-                    "https://cortexbackend.onrender.com/chat",
+                    CHAT_ENDPOINT,
                     {
                         method: "POST",
 

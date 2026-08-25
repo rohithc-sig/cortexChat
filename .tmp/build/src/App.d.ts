@@ -1,8 +1,17 @@
+import powerbi from "powerbi-visuals-api";
+type VisualHost = powerbi.extensibility.visual.IVisualHost;
 export declare class App {
     private container;
+    private host;
     private pbiContext;
-    constructor(container: HTMLElement);
+    private userEmail?;
+    private userRegion?;
+    private userIdentity;
+    constructor(container: HTMLElement, host: VisualHost);
+    private loadUserIdentity;
     setContext(context: any): void;
+    setUserEmail(userEmail?: string): void;
+    setUserRegion(userRegion?: string): void;
     private renderBaseUI;
     private attachEvents;
     private handleAskQuery;
@@ -15,3 +24,4 @@ export declare class App {
     private escapeHtml;
     private getTimestamp;
 }
+export {};

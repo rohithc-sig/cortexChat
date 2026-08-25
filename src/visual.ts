@@ -9,6 +9,8 @@ import VisualUpdateOptions =
     powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual =
     powerbi.extensibility.visual.IVisual;
+import IVisualHost =
+    powerbi.extensibility.visual.IVisualHost;
 
 import { App } from "./App";
 
@@ -20,7 +22,7 @@ export class Visual implements IVisual {
         this.targetElement = options.element;
 
         // Initialize the UI handler inside the visual container
-        this.app = new App(this.targetElement);
+        this.app = new App(this.targetElement, options.host);
     }
 
     public update(options: VisualUpdateOptions) {
@@ -37,7 +39,30 @@ export class Visual implements IVisual {
             categories: []
         };
 
-        // 1. Extract active categories and slicer states from DataView
+        // 1. Extract evaluated identity measures and slicer states
+        const userEmailValue =
+            dataView?.categorical?.values?.find(
+                valueColumn =>
+                    valueColumn.source.roles?.userEmail
+            )?.values?.[0];
+
+        this.app.setUserEmail(
+            userEmailValue === null || userEmailValue === undefined
+                ? undefined
+                : String(userEmailValue)
+        );
+
+        const userRegionValue =
+            dataView?.categorical?.values?.find(
+                valueColumn =>
+                    valueColumn.source.roles?.userRegion
+            )?.values?.[0];
+
+        this.app.setUserRegion(
+            userRegionValue === null || userRegionValue === undefined
+                ? undefined
+                : String(userRegionValue)
+        );
         if (
             dataView &&
             dataView.categorical &&
