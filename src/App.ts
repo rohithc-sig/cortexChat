@@ -1114,6 +1114,12 @@ export class App {
                         console.error(
                             "CSV data not found"
                         );
+
+                        this.showToast(
+                            "CSV data not found",
+                            "error"
+                        );
+
                         return;
                     }
 
@@ -1122,23 +1128,31 @@ export class App {
                         "Download CSV";
 
                     downloadButton.disabled = true;
+
                     downloadButton.textContent =
                         "Downloading...";
 
                     try {
-                        this.downloadCsv(
+
+                        await this.downloadCsv(
                             csvData.columns,
                             csvData.rows
                         );
+
                     } finally {
+
                         setTimeout(
                             () => {
+
                                 downloadButton.disabled = false;
+
                                 downloadButton.textContent =
                                     originalButtonText;
+
                             },
                             1200
                         );
+
                     }
 
                     return;
@@ -1197,6 +1211,7 @@ export class App {
                     if (copied) {
                         copyCsvButton.textContent =
                             "Copied!";
+
                         this.showToast(
                             "CSV copied to clipboard",
                             "success"
@@ -1204,6 +1219,7 @@ export class App {
                     } else {
                         copyCsvButton.textContent =
                             originalButtonText;
+
                         this.showToast(
                             "Unable to copy CSV. Please try again.",
                             "error"
@@ -1241,6 +1257,7 @@ export class App {
                     if (inputEl) {
                         inputEl.value =
                             followUpButton.dataset.question || "";
+
                         inputEl.focus();
                     }
 
@@ -1292,6 +1309,7 @@ export class App {
                     if (copied) {
                         copySqlButton.textContent =
                             "Copied!";
+
                         this.showToast(
                             "SQL copied to clipboard",
                             "success"
@@ -1299,6 +1317,7 @@ export class App {
                     } else {
                         copySqlButton.textContent =
                             originalButtonText;
+
                         this.showToast(
                             "Unable to copy SQL. Please try again.",
                             "error"
@@ -2032,16 +2051,14 @@ export class App {
        DOWNLOAD CSV
        ============================== */
 
-    private downloadCsv(
+    private async downloadCsv(
         columns: string[],
         rows: any[]
-    ) {
+    ): Promise<boolean> {
 
         try {
 
-            console.log(
-                "Starting CSV download..."
-            );
+            console.log("Starting Power BI CSV download...");
 
             const csvContent =
                 this.buildCsvContent(
@@ -2049,126 +2066,139 @@ export class App {
                     rows
                 );
 
-            console.log(
-                "CSV generated successfully"
-            );
+            if (!csvContent) {
+                console.error("CSV content is empty");
+                return false;
+            }
 
+            /*
+            * Power BI Custom Visual File Download API
+            *
+            * This is the supported way to download files
+            * from a custom visual.
+            */
 
-            const blob =
-                new Blob(
-                    [csvContent],
-                    {
-                        type:
-                            "text/csv;charset=utf-8"
-                    }
+            if (!this.host.downloadService) {
+
+                console.error(
+                    "Power BI download service is unavailable."
                 );
 
-
-            const url =
-                URL.createObjectURL(
-                    blob
+                this.showToast(
+                    "Power BI download service is unavailable",
+                    "error"
                 );
 
+                return false;
+            }
 
-            const link =
-                document.createElement(
-                    "a"
+
+            /*
+            * Check whether Power BI allows this visual
+            * to download files.
+            */
+
+            try {
+
+                const status =
+                    await this.host.downloadService.exportStatus();
+
+                console.log(
+                    "Power BI download status:",
+                    status
                 );
 
+                if (
+                    status !==
+                    powerbi.PrivilegeStatus.Allowed
+                ) {
 
-            link.href =
-                url;
+                    console.error(
+                        "Power BI download API is not allowed. Status:",
+                        status
+                    );
+
+                    this.showToast(
+                        "Downloads are not enabled for this custom visual",
+                        "error"
+                    );
+
+                    return false;
+                }
+
+            } catch (statusError) {
+
+                console.warn(
+                    "Could not determine download API status:",
+                    statusError
+                );
+
+            }
 
 
             const fileName =
                 `cortex_analyst_result_${this.getTimestamp()}.csv`;
 
-            link.download =
-                fileName;
 
-            link.setAttribute(
-                "download",
-                fileName
-            );
+            /*
+            * IMPORTANT:
+            *
+            * For CSV the content is passed directly as text.
+            *
+            * Do NOT create a Blob.
+            * Do NOT create an object URL.
+            * Do NOT use window.open().
+            * Do NOT manually click an <a>.
+            */
 
-            link.target =
-                "_blank";
-
-            link.rel =
-                "noopener noreferrer";
-
-            link.style.position =
-                "fixed";
-
-            link.style.left =
-                "-9999px";
-
-            link.style.top =
-                "-9999px";
-
-            link.style.opacity =
-                "0";
-
-
-            const hostRoot =
-                document.body || document.documentElement;
-
-            hostRoot.appendChild(
-                link
-            );
-
-
-            if (window.open) {
-
-                window.open(
-                    url,
-                    "_blank",
-                    "noopener,noreferrer"
+            const result =
+                await this.host.downloadService.exportVisualsContent(
+                    csvContent,
+                    fileName,
+                    "csv",
+                    "Cortex Analyst query result"
                 );
 
+
+            console.log(
+                "Power BI download result:",
+                result
+            );
+
+
+            if (result) {
+
+                this.showToast(
+                    "CSV download started",
+                    "success"
+                );
+
+                return true;
             }
 
-            link.click();
 
-            link.dispatchEvent(
-                new MouseEvent(
-                    "click",
-                    {
-                        bubbles: true,
-                        cancelable: true,
-                        view: window
-                    }
-                )
+            this.showToast(
+                "Power BI could not download the CSV",
+                "error"
             );
 
-
-            setTimeout(
-                () => {
-
-                    if (link.parentNode) {
-
-                        link.parentNode.removeChild(
-                            link
-                        );
-
-                    }
-
-                    URL.revokeObjectURL(
-                        url
-                    );
-
-                },
-                5000
-            );
+            return false;
 
 
-        } catch (error) {
+        } catch (error: any) {
 
             console.error(
-                "CSV download failed:",
+                "Power BI CSV download failed:",
                 error
             );
 
+            this.showToast(
+                error?.message ||
+                    "CSV download failed",
+                "error"
+            );
+
+            return false;
         }
 
     }

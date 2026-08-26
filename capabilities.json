@@ -51,6 +51,10 @@
       ]
     },
     {
+        "name": "ExportContent",
+        "essential": true
+    },
+    {
       "name": "AADAuthentication",
       "essential": false
     }
