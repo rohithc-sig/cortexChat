@@ -9,12 +9,15 @@ export class App {
     private pbiContext: any = { categories: [] };
     private userEmail?: string;
     private userRegion?: string;
+
     private userIdentity: {
         status: "available" | "unavailable";
         userId?: string;
         tenantId?: string;
         error?: string;
     } = { status: "unavailable" };
+
+    private interactionStarted: boolean = false;
 
     constructor(container: HTMLElement, host: VisualHost) {
         this.container = container;
@@ -65,7 +68,12 @@ export class App {
                     box-sizing: border-box;
                     color: #1e293b;
                     overflow: hidden;
+                    position: relative;
                 }
+
+                /* ==============================
+                   HEADER
+                   ============================== */
 
                 .cortex-header {
                     padding: 12px 16px;
@@ -73,6 +81,7 @@ export class App {
                     align-items: center;
                     justify-content: space-between;
                     border-bottom: 1px solid #f1f5f9;
+                    flex-shrink: 0;
                 }
 
                 .header-left {
@@ -92,6 +101,7 @@ export class App {
                     color: white;
                     font-weight: bold;
                     font-size: 16px;
+                    flex-shrink: 0;
                 }
 
                 .header-title-container {
@@ -110,6 +120,12 @@ export class App {
                     font-size: 11px;
                     color: #64748b;
                     margin: 0;
+                }
+
+                .header-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
                 }
 
                 .status-badge {
@@ -131,9 +147,31 @@ export class App {
                     border-radius: 50%;
                 }
 
+                .back-btn {
+                    border: 1px solid #cbd5e1;
+                    background-color: #ffffff;
+                    color: #475569;
+                    border-radius: 6px;
+                    padding: 5px 9px;
+                    font-size: 10px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.15s ease;
+                }
+
+                .back-btn:hover {
+                    background-color: #f8fafc;
+                    border-color: #94a3b8;
+                }
+
+                /* ==============================
+                   CONTEXT
+                   ============================== */
+
                 .context-section {
                     padding: 8px 16px;
                     border-bottom: 1px solid #f1f5f9;
+                    flex-shrink: 0;
                 }
 
                 .context-title {
@@ -161,6 +199,109 @@ export class App {
                     display: flex;
                     align-items: center;
                     gap: 4px;
+                }
+
+                /* ==============================
+                   WELCOME SCREEN
+                   ============================== */
+
+                .welcome-screen {
+                    flex-grow: 1;
+                    overflow-y: auto;
+                    padding: 24px 18px 18px 18px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    box-sizing: border-box;
+                }
+
+                .welcome-icon {
+                    width: 46px;
+                    height: 46px;
+                    border-radius: 50%;
+                    background-color: #0284c7;
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 22px;
+                    font-weight: 700;
+                    margin-bottom: 12px;
+                }
+
+                .welcome-title {
+                    font-size: 19px;
+                    font-weight: 700;
+                    color: #0f172a;
+                    margin: 0;
+                    text-align: center;
+                }
+
+                .welcome-subtitle {
+                    font-size: 12px;
+                    line-height: 1.5;
+                    color: #64748b;
+                    margin: 7px 0 20px 0;
+                    text-align: center;
+                    max-width: 420px;
+                }
+
+                .starter-section {
+                    width: 100%;
+                    max-width: 520px;
+                }
+
+                .starter-title {
+                    font-size: 9px;
+                    font-weight: 700;
+                    color: #64748b;
+                    letter-spacing: 0.5px;
+                    text-transform: uppercase;
+                    margin-bottom: 8px;
+                }
+
+                .starter-questions {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .starter-question {
+                    width: 100%;
+                    box-sizing: border-box;
+                    border: 1px solid #dbeafe;
+                    background-color: #f8fbff;
+                    color: #1d4ed8;
+                    border-radius: 9px;
+                    padding: 10px 12px;
+                    font-size: 11px;
+                    text-align: left;
+                    cursor: pointer;
+                    transition: all 0.15s ease;
+                }
+
+                .starter-question:hover {
+                    background-color: #eff6ff;
+                    border-color: #93c5fd;
+                    transform: translateY(-1px);
+                }
+
+                .custom-question-hint {
+                    margin-top: 12px;
+                    width: 100%;
+                    max-width: 520px;
+                    box-sizing: border-box;
+                    padding: 9px 12px;
+                    border-radius: 8px;
+                    background-color: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    color: #64748b;
+                    font-size: 10px;
+                    text-align: center;
+                }
+
+                .custom-question-hint strong {
+                    color: #475569;
                 }
 
                 /* ==============================
@@ -282,13 +423,18 @@ export class App {
                     border-radius: 8px;
                     font-size: 11px;
                     font-weight: 600;
-                    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+                    box-shadow:
+                        0 10px 25px -5px rgba(15, 23, 42, 0.12),
+                        0 8px 10px -6px rgba(15, 23, 42, 0.08);
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
                     gap: 8px;
                     pointer-events: auto;
-                    animation: toast-notification-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    animation:
+                        toast-notification-in
+                        0.25s cubic-bezier(0.16, 1, 0.3, 1)
+                        forwards;
                     transition: all 0.2s ease;
                 }
 
@@ -314,7 +460,10 @@ export class App {
                 }
 
                 .toast-notification-fade-out {
-                    animation: toast-notification-out 0.2s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+                    animation:
+                        toast-notification-out
+                        0.2s cubic-bezier(0.7, 0, 0.84, 0)
+                        forwards;
                 }
 
                 @keyframes toast-notification-in {
@@ -322,6 +471,7 @@ export class App {
                         opacity: 0;
                         transform: translateY(10px) scale(0.96);
                     }
+
                     to {
                         opacity: 1;
                         transform: translateY(0) scale(1);
@@ -333,6 +483,7 @@ export class App {
                         opacity: 1;
                         transform: translateY(0) scale(1);
                     }
+
                     to {
                         opacity: 0;
                         transform: translateY(10px) scale(0.96);
@@ -391,7 +542,7 @@ export class App {
                 }
 
                 /* ==============================
-                   TABLE STYLES (STICKY, STRIPED, HOVER)
+                   TABLE STYLES
                    ============================== */
 
                 .data-table-wrapper {
@@ -433,10 +584,11 @@ export class App {
                     transition: background-color 0.15s ease;
                 }
 
-                /* Row Striping */
                 .data-table tbody tr {
                     background-color: #ffffff;
-                    transition: background-color 0.16s ease, box-shadow 0.16s ease;
+                    transition:
+                        background-color 0.16s ease,
+                        box-shadow 0.16s ease;
                 }
 
                 .data-table tbody tr:nth-child(odd) {
@@ -447,24 +599,23 @@ export class App {
                     background-color: #f5f5f5;
                 }
 
-                /* Row Hover */
                 .data-table tbody tr:hover {
                     background-color: #eaf3ff;
                     box-shadow: inset 0 0 0 1px #d0e4ff;
                 }
 
-                /* Cell Hover */
                 .data-table td:hover {
                     background-color: transparent;
                 }
 
                 /* ==============================
-                   EXECUTIVE KPI CALLOUT CARDS
+                   KPI CARDS
                    ============================== */
 
                 .kpi-cards-container {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                    grid-template-columns:
+                        repeat(auto-fit, minmax(130px, 1fr));
                     gap: 10px;
                     margin: 12px 0;
                 }
@@ -478,12 +629,15 @@ export class App {
                     display: flex;
                     flex-direction: column;
                     gap: 4px;
-                    transition: transform 0.15s ease, box-shadow 0.15s ease;
+                    transition:
+                        transform 0.15s ease,
+                        box-shadow 0.15s ease;
                 }
 
                 .kpi-card:hover {
                     transform: translateY(-1px);
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+                    box-shadow:
+                        0 4px 6px -1px rgba(0, 0, 0, 0.08);
                 }
 
                 .kpi-title {
@@ -562,6 +716,150 @@ export class App {
                     margin-left: 8px;
                 }
 
+                /* ==============================
+                   RCA
+                   ============================== */
+
+                .rca-action-container {
+                    margin-top: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .rca-btn {
+                    border: 1px solid #0284c7;
+                    background-color: #ffffff;
+                    color: #0369a1;
+                    border-radius: 7px;
+                    padding: 7px 12px;
+                    font-size: 11px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.15s ease;
+                }
+
+                .rca-btn:hover {
+                    background-color: #f0f9ff;
+                }
+
+                .rca-btn:disabled {
+                    opacity: 0.65;
+                    cursor: wait;
+                }
+
+                .rca-section {
+                    margin-top: 12px;
+                    border: 1px solid #dbeafe;
+                    background-color: #f8fbff;
+                    border-radius: 10px;
+                    padding: 12px;
+                }
+
+                .rca-title {
+                    font-size: 11px;
+                    font-weight: 800;
+                    color: #0369a1;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 10px;
+                }
+
+                .rca-summary {
+                    font-size: 12px;
+                    line-height: 1.55;
+                    color: #334155;
+                    margin-bottom: 12px;
+                }
+
+                .rca-subtitle {
+                    font-size: 10px;
+                    font-weight: 800;
+                    color: #475569;
+                    text-transform: uppercase;
+                    letter-spacing: 0.45px;
+                    margin: 12px 0 7px 0;
+                }
+
+                .rca-driver {
+                    border: 1px solid #e2e8f0;
+                    background: #ffffff;
+                    border-radius: 8px;
+                    padding: 9px;
+                    margin-bottom: 7px;
+                }
+
+                .rca-driver-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    gap: 8px;
+                    margin-bottom: 5px;
+                }
+
+                .rca-driver-name {
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: #0f172a;
+                }
+
+                .rca-confidence {
+                    flex-shrink: 0;
+                    border-radius: 10px;
+                    padding: 2px 7px;
+                    font-size: 9px;
+                    font-weight: 700;
+                }
+
+                .rca-confidence-high {
+                    background-color: #dcfce7;
+                    color: #166534;
+                }
+
+                .rca-confidence-medium {
+                    background-color: #fef3c7;
+                    color: #92400e;
+                }
+
+                .rca-confidence-low {
+                    background-color: #fee2e2;
+                    color: #991b1b;
+                }
+
+                .rca-driver-row {
+                    margin-top: 4px;
+                    font-size: 10px;
+                    line-height: 1.45;
+                    color: #475569;
+                }
+
+                .rca-driver-label {
+                    font-weight: 700;
+                    color: #334155;
+                }
+
+                .rca-list {
+                    margin: 0;
+                    padding-left: 18px;
+                }
+
+                .rca-list li {
+                    font-size: 11px;
+                    line-height: 1.5;
+                    color: #475569;
+                    margin-bottom: 5px;
+                }
+
+                .rca-caveat {
+                    font-size: 10px;
+                    line-height: 1.45;
+                    color: #64748b;
+                    margin-top: 5px;
+                    padding: 7px 9px;
+                    border-left: 3px solid #cbd5e1;
+                    background: #ffffff;
+                }
+
                 .sql-accordion {
                     margin-top: 10px;
                     border: 1px solid #e2e8f0;
@@ -610,22 +908,15 @@ export class App {
                     background-color: #eff6ff;
                 }
 
-                .suggested-section {
-                    padding: 8px 16px;
-                }
-
-                .suggested-title {
-                    font-size: 9px;
-                    font-weight: 700;
-                    color: #64748b;
-                    letter-spacing: 0.5px;
-                    text-transform: uppercase;
-                    margin-bottom: 6px;
-                }
+                /* ==============================
+                   INPUT
+                   ============================== */
 
                 .input-container {
                     padding: 8px 16px 12px 16px;
                     position: relative;
+                    flex-shrink: 0;
+                    background-color: #ffffff;
                 }
 
                 .input-box {
@@ -636,6 +927,11 @@ export class App {
                     outline: none;
                     font-size: 12px;
                     box-sizing: border-box;
+                }
+
+                .input-box:focus {
+                    border-color: #60a5fa;
+                    box-shadow: 0 0 0 2px #eff6ff;
                 }
 
                 .send-btn {
@@ -654,11 +950,14 @@ export class App {
                     justify-content: center;
                     cursor: pointer;
                 }
+
+                .send-btn:hover {
+                    background-color: #005fc4;
+                }
             </style>
 
             <div class="cortex-container">
 
-                <!-- Header -->
                 <div class="cortex-header">
 
                     <div class="header-left">
@@ -681,18 +980,29 @@ export class App {
 
                     </div>
 
-                    <div class="status-badge">
+                    <div class="header-right">
 
-                        <span class="status-dot"></span>
+                        <button
+                            id="backBtn"
+                            class="back-btn"
+                            type="button"
+                            style="display: none;"
+                        >
+                            ← Back
+                        </button>
 
-                        Connected
+                        <div class="status-badge">
+
+                            <span class="status-dot"></span>
+
+                            Connected
+
+                        </div>
 
                     </div>
 
                 </div>
 
-
-                <!-- Active Context Pills -->
                 <div class="context-section">
 
                     <div class="context-title">
@@ -730,10 +1040,88 @@ export class App {
 
                 </div>
 
+                <!-- ==============================
+                     WELCOME SCREEN
+                     ============================== -->
 
-                <!-- DEBUG REQUEST -->
+                <div
+                    id="welcomeScreen"
+                    class="welcome-screen"
+                >
 
-                <div class="request-debug-section">
+                    <div class="welcome-icon">
+                        ✦
+                    </div>
+
+                    <h2 class="welcome-title">
+                        Hello, welcome to Cortex Analyst
+                    </h2>
+
+                    <div class="welcome-subtitle">
+                        Ask questions about your report,
+                        data and active Power BI context.
+                    </div>
+
+                    <div class="starter-section">
+
+                        <div class="starter-title">
+                            GET STARTED WITH A QUESTION
+                        </div>
+
+                        <div class="starter-questions">
+
+                            <button
+                                class="starter-question"
+                                type="button"
+                                data-question="Top 10 brands"
+                            >
+                                Top 10 brands
+                            </button>
+
+                            <button
+                                class="starter-question"
+                                type="button"
+                                data-question="Revenue by retailer"
+                            >
+                                Revenue by retailer
+                            </button>
+
+                            <button
+                                class="starter-question"
+                                type="button"
+                                data-question="Sales trend over time"
+                            >
+                                Sales trend over time
+                            </button>
+
+                            <button
+                                class="starter-question"
+                                type="button"
+                                data-question="Which products are declining?"
+                            >
+                                Which products are declining?
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="custom-question-hint">
+                        Or ask a <strong>custom question</strong>
+                        using the input box below.
+                    </div>
+
+                </div>
+
+                <!-- ==============================
+                     DEBUG REQUEST SECTION
+                     ============================== -->
+
+                <div
+                    id="requestDebugSection"
+                    class="request-debug-section"
+                    style="display: none;"
+                >
 
                     <div class="request-debug-header-row">
 
@@ -776,6 +1164,10 @@ export class App {
 
                 </div>
 
+                <!-- ==============================
+                     TOAST
+                     ============================== -->
+
                 <div
                     id="cortexToast"
                     class="toast-container"
@@ -783,76 +1175,19 @@ export class App {
                     aria-atomic="true"
                 ></div>
 
-
-                <!-- Chat Scroll View -->
+                <!-- ==============================
+                     CHAT HISTORY
+                     ============================== -->
 
                 <div
                     class="chat-history"
                     id="chatHistory"
-                >
+                    style="display: none;"
+                ></div>
 
-                    <div
-                        style="
-                            text-align: center;
-                            color: #94a3b8;
-                            font-size: 12px;
-                            margin-top: 20px;
-                        "
-                    >
-                        Ask a question to query Snowflake Cortex
-                        with your active slicer context.
-                    </div>
-
-                </div>
-
-
-                <!-- Suggested Questions -->
-
-                <div class="suggested-section">
-
-                    <div class="suggested-title">
-                        SUGGESTED QUESTIONS
-                    </div>
-
-                    <div
-                        class="chips-container"
-                        id="suggestedChips"
-                    >
-
-                        <div
-                            class="chip"
-                            style="cursor: pointer;"
-                        >
-                            Top 10 brands
-                        </div>
-
-                        <div
-                            class="chip"
-                            style="cursor: pointer;"
-                        >
-                            Revenue by retailer
-                        </div>
-
-                        <div
-                            class="chip"
-                            style="cursor: pointer;"
-                        >
-                            Sales trend over time
-                        </div>
-
-                        <div
-                            class="chip"
-                            style="cursor: pointer;"
-                        >
-                            Which products are declining?
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- Input Footer -->
+                <!-- ==============================
+                     FIXED INPUT
+                     ============================== -->
 
                 <div class="input-container">
 
@@ -879,7 +1214,6 @@ export class App {
         this.attachEvents();
     }
 
-
     private attachEvents() {
 
         const askBtn =
@@ -892,10 +1226,10 @@ export class App {
                 "#cortexQueryInput"
             ) as HTMLInputElement;
 
-
-        /* ==============================
-           ASK QUERY
-           ============================== */
+        const backBtn =
+            this.container.querySelector(
+                "#backBtn"
+            ) as HTMLButtonElement;
 
         const triggerQuery = () => {
 
@@ -903,6 +1237,8 @@ export class App {
                 queryInput.value.trim();
 
             if (queryText) {
+
+                this.startInteraction();
 
                 this.handleAskQuery(
                     queryText
@@ -912,12 +1248,10 @@ export class App {
             }
         };
 
-
         askBtn.addEventListener(
             "click",
             triggerQuery
         );
-
 
         queryInput.addEventListener(
             "keypress",
@@ -932,34 +1266,36 @@ export class App {
             }
         );
 
-
         /* ==============================
-           SUGGESTED QUESTIONS
+           STARTER QUESTIONS
            ============================== */
 
-        const suggestedChips =
+        const starterQuestions =
             this.container.querySelectorAll(
-                "#suggestedChips .chip"
+                ".starter-question"
             );
 
+        starterQuestions.forEach(
+            button => {
 
-        suggestedChips.forEach(
-            chip => {
-
-                chip.addEventListener(
+                button.addEventListener(
                     "click",
                     () => {
 
-                        const text =
-                            chip.textContent || "";
+                        const question =
+                            (
+                                button as HTMLElement
+                            ).dataset.question || "";
 
-                        if (text) {
-
-                            this.handleAskQuery(
-                                text
-                            );
-
+                        if (!question) {
+                            return;
                         }
+
+                        this.startInteraction();
+
+                        this.handleAskQuery(
+                            question
+                        );
 
                     }
                 );
@@ -967,9 +1303,25 @@ export class App {
             }
         );
 
+        /* ==============================
+           BACK BUTTON
+           ============================== */
+
+        if (backBtn) {
+
+            backBtn.addEventListener(
+                "click",
+                () => {
+
+                    this.returnToWelcome();
+
+                }
+            );
+
+        }
 
         /* ==============================
-           COPY DEBUG REQUEST
+           DEBUG
            ============================== */
 
         const copyRequestBtn =
@@ -1006,7 +1358,6 @@ export class App {
             );
 
         }
-
 
         if (copyRequestBtn) {
 
@@ -1067,9 +1418,8 @@ export class App {
 
         }
 
-
         /* ==============================
-           CSV DOWNLOAD & SQL COPY
+           CSV / RCA / SQL / FOLLOW-UP
            ============================== */
 
         this.container.addEventListener(
@@ -1079,12 +1429,10 @@ export class App {
                 const target =
                     event.target as HTMLElement;
 
-
                 const downloadButton =
                     target.closest(
                         '[data-action="download-csv"]'
                     ) as HTMLButtonElement;
-
 
                 if (downloadButton) {
 
@@ -1097,9 +1445,11 @@ export class App {
                         ) as HTMLElement;
 
                     if (!botContent) {
+
                         console.error(
                             "Could not find bot content"
                         );
+
                         return;
                     }
 
@@ -1111,9 +1461,6 @@ export class App {
                         !csvData.columns ||
                         !csvData.rows
                     ) {
-                        console.error(
-                            "CSV data not found"
-                        );
 
                         this.showToast(
                             "CSV data not found",
@@ -1127,7 +1474,8 @@ export class App {
                         downloadButton.textContent ||
                         "Download CSV";
 
-                    downloadButton.disabled = true;
+                    downloadButton.disabled =
+                        true;
 
                     downloadButton.textContent =
                         "Downloading...";
@@ -1144,7 +1492,8 @@ export class App {
                         setTimeout(
                             () => {
 
-                                downloadButton.disabled = false;
+                                downloadButton.disabled =
+                                    false;
 
                                 downloadButton.textContent =
                                     originalButtonText;
@@ -1158,12 +1507,10 @@ export class App {
                     return;
                 }
 
-
                 const copyCsvButton =
                     target.closest(
                         '[data-action="copy-csv"]'
                     ) as HTMLButtonElement;
-
 
                 if (copyCsvButton) {
 
@@ -1176,9 +1523,6 @@ export class App {
                         ) as HTMLElement;
 
                     if (!botContent) {
-                        console.error(
-                            "Could not find bot content"
-                        );
                         return;
                     }
 
@@ -1197,7 +1541,9 @@ export class App {
                         copyCsvButton.textContent ||
                         "Copy CSV";
 
-                    copyCsvButton.disabled = true;
+                    copyCsvButton.disabled =
+                        true;
+
                     copyCsvButton.textContent =
                         "Copying...";
 
@@ -1206,9 +1552,11 @@ export class App {
                             csvText
                         );
 
-                    copyCsvButton.disabled = false;
+                    copyCsvButton.disabled =
+                        false;
 
                     if (copied) {
+
                         copyCsvButton.textContent =
                             "Copied!";
 
@@ -1216,7 +1564,9 @@ export class App {
                             "CSV copied to clipboard",
                             "success"
                         );
+
                     } else {
+
                         copyCsvButton.textContent =
                             originalButtonText;
 
@@ -1224,12 +1574,15 @@ export class App {
                             "Unable to copy CSV. Please try again.",
                             "error"
                         );
+
                     }
 
                     setTimeout(
                         () => {
+
                             copyCsvButton.textContent =
                                 originalButtonText;
+
                         },
                         1200
                     );
@@ -1237,12 +1590,65 @@ export class App {
                     return;
                 }
 
+                /* ==============================
+                   RCA
+                   ============================== */
+
+                const rcaButton =
+                    target.closest(
+                        '[data-action="root-cause-analysis"]'
+                    ) as HTMLButtonElement;
+
+                if (rcaButton) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const botContent =
+                        rcaButton.closest(
+                            ".bot-content"
+                        ) as HTMLElement;
+
+                    if (!botContent) {
+
+                        this.showToast(
+                            "Unable to locate query result",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+                    const rcaData =
+                        (botContent as any).__rcaData;
+
+                    if (!rcaData) {
+
+                        this.showToast(
+                            "RCA data is not available",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+                    await this.handleRootCauseAnalysis(
+                        rcaButton,
+                        botContent,
+                        rcaData
+                    );
+
+                    return;
+                }
+
+                /* ==============================
+                   FOLLOW-UP
+                   ============================== */
 
                 const followUpButton =
                     target.closest(
                         '[data-action="follow-up-question"]'
                     ) as HTMLButtonElement;
-
 
                 if (followUpButton) {
 
@@ -1255,21 +1661,25 @@ export class App {
                         ) as HTMLInputElement | null;
 
                     if (inputEl) {
+
                         inputEl.value =
                             followUpButton.dataset.question || "";
 
                         inputEl.focus();
+
                     }
 
                     return;
                 }
 
+                /* ==============================
+                   COPY SQL
+                   ============================== */
 
                 const copySqlButton =
                     target.closest(
                         '[data-action="copy-sql"]'
                     ) as HTMLButtonElement;
-
 
                 if (copySqlButton) {
 
@@ -1282,9 +1692,6 @@ export class App {
                         ) as HTMLElement;
 
                     if (!botContent) {
-                        console.error(
-                            "Could not find bot content"
-                        );
                         return;
                     }
 
@@ -1295,7 +1702,9 @@ export class App {
                         copySqlButton.textContent ||
                         "Copy SQL";
 
-                    copySqlButton.disabled = true;
+                    copySqlButton.disabled =
+                        true;
+
                     copySqlButton.textContent =
                         "Copying...";
 
@@ -1304,9 +1713,11 @@ export class App {
                             sqlText
                         );
 
-                    copySqlButton.disabled = false;
+                    copySqlButton.disabled =
+                        false;
 
                     if (copied) {
+
                         copySqlButton.textContent =
                             "Copied!";
 
@@ -1314,7 +1725,9 @@ export class App {
                             "SQL copied to clipboard",
                             "success"
                         );
+
                     } else {
+
                         copySqlButton.textContent =
                             originalButtonText;
 
@@ -1322,12 +1735,15 @@ export class App {
                             "Unable to copy SQL. Please try again.",
                             "error"
                         );
+
                     }
 
                     setTimeout(
                         () => {
+
                             copySqlButton.textContent =
                                 originalButtonText;
+
                         },
                         1200
                     );
@@ -1339,6 +1755,179 @@ export class App {
 
     }
 
+    /* =====================================================
+       INTERACTION STATE
+       ===================================================== */
+
+    private startInteraction() {
+
+        if (this.interactionStarted) {
+            return;
+        }
+
+        this.interactionStarted =
+            true;
+
+        const welcomeScreen =
+            this.container.querySelector(
+                "#welcomeScreen"
+            ) as HTMLElement;
+
+        const chatHistory =
+            this.container.querySelector(
+                "#chatHistory"
+            ) as HTMLElement;
+
+        const backBtn =
+            this.container.querySelector(
+                "#backBtn"
+            ) as HTMLButtonElement;
+
+        const debugSection =
+            this.container.querySelector(
+                "#requestDebugSection"
+            ) as HTMLElement;
+
+        if (welcomeScreen) {
+
+            welcomeScreen.style.display =
+                "none";
+
+        }
+
+        if (chatHistory) {
+
+            chatHistory.style.display =
+                "flex";
+
+        }
+
+        if (backBtn) {
+
+            backBtn.style.display =
+                "block";
+
+        }
+
+        if (debugSection) {
+
+            debugSection.style.display =
+                "block";
+
+        }
+
+    }
+
+    /* =====================================================
+       RETURN TO WELCOME SCREEN
+       ===================================================== */
+
+    private returnToWelcome() {
+
+        this.interactionStarted =
+            false;
+
+        const welcomeScreen =
+            this.container.querySelector(
+                "#welcomeScreen"
+            ) as HTMLElement;
+
+        const chatHistory =
+            this.container.querySelector(
+                "#chatHistory"
+            ) as HTMLElement;
+
+        const backBtn =
+            this.container.querySelector(
+                "#backBtn"
+            ) as HTMLButtonElement;
+
+        const debugSection =
+            this.container.querySelector(
+                "#requestDebugSection"
+            ) as HTMLElement;
+
+        const debugContent =
+            this.container.querySelector(
+                "#requestDebugContent"
+            ) as HTMLElement;
+
+        const debugToggle =
+            this.container.querySelector(
+                "[data-action='toggle-debug']"
+            ) as HTMLButtonElement;
+
+        const queryInput =
+            this.container.querySelector(
+                "#cortexQueryInput"
+            ) as HTMLInputElement;
+
+        if (chatHistory) {
+
+            chatHistory.innerHTML =
+                "";
+
+            chatHistory.style.display =
+                "none";
+
+        }
+
+        if (welcomeScreen) {
+
+            welcomeScreen.style.display =
+                "flex";
+
+        }
+
+        if (backBtn) {
+
+            backBtn.style.display =
+                "none";
+
+        }
+
+        if (debugSection) {
+
+            debugSection.style.display =
+                "none";
+
+        }
+
+        if (debugContent) {
+
+            debugContent.textContent = `{
+  "question": "",
+  "pbi_context": {
+    "categories": []
+  }
+}`;
+
+            debugContent.hidden =
+                true;
+
+        }
+
+        if (debugToggle) {
+
+            debugToggle.textContent =
+                "Show";
+
+        }
+
+        if (queryInput) {
+
+            queryInput.value =
+                "";
+
+            queryInput.focus();
+
+        }
+
+    }
+
+    /* =====================================================
+       ASK QUERY
+       ===================================================== */
 
     private async handleAskQuery(
         queryText: string
@@ -1349,33 +1938,31 @@ export class App {
                 "#chatHistory"
             ) as HTMLElement;
 
-
         await this.loadUserIdentity();
 
         const requestPayload = {
 
-            question: queryText,
+            question:
+                queryText,
 
-            pbi_context: this.pbiContext,
+            pbi_context:
+                this.pbiContext,
 
-            user_email: this.userEmail,
+            user_email:
+                this.userEmail,
 
-            user_region: this.userRegion,
+            user_region:
+                this.userRegion,
 
-            user_identity: this.userIdentity
+            user_identity:
+                this.userIdentity
 
         };
-
-
-        /* ==============================
-           UPDATE DEBUG SECTION
-           ============================== */
 
         const requestDebugContent =
             this.container.querySelector(
                 "#requestDebugContent"
             ) as HTMLElement;
-
 
         if (requestDebugContent) {
 
@@ -1388,56 +1975,25 @@ export class App {
 
         }
 
-
-        /* ==============================
-           CLEAN INITIAL PLACEHOLDER
-           ============================== */
-
-        const initialPlaceholder =
-            chatHistory.querySelector(
-                "div[style*='text-align: center']"
-            );
-
-
-        if (initialPlaceholder) {
-
-            initialPlaceholder.remove();
-
-        }
-
-
-        /* ==============================
-           USER MESSAGE
-           ============================== */
-
         const userBubble =
             document.createElement(
                 "div"
             );
 
-
         userBubble.className =
             "user-message";
 
-
         userBubble.textContent =
             queryText;
-
 
         chatHistory.appendChild(
             userBubble
         );
 
-
-        /* ==============================
-           THINKING INDICATOR
-           ============================== */
-
         const botBubble =
             document.createElement(
                 "div"
             );
-
 
         botBubble.innerHTML = `
 
@@ -1462,19 +2018,12 @@ export class App {
 
         `;
 
-
         chatHistory.appendChild(
             botBubble
         );
 
-
         chatHistory.scrollTop =
             chatHistory.scrollHeight;
-
-
-        /* ==============================
-           BACKEND REQUEST
-           ============================== */
 
         try {
 
@@ -1496,12 +2045,10 @@ export class App {
                     }
                 );
 
-
             if (!response.ok) {
 
                 const errorText =
                     await response.text();
-
 
                 throw new Error(
                     `Server returned ${response.status}: ${errorText}`
@@ -1509,16 +2056,13 @@ export class App {
 
             }
 
-
             const data =
                 await response.json();
-
 
             this.renderResponse(
                 botBubble,
                 data
             );
-
 
         } catch (error: any) {
 
@@ -1527,12 +2071,10 @@ export class App {
                     ".bot-content"
                 ) as HTMLElement;
 
-
             if (contentDiv) {
 
                 contentDiv.style.color =
                     "#dc2626";
-
 
                 contentDiv.textContent =
                     `Error: ${error.message}`;
@@ -1543,6 +2085,561 @@ export class App {
 
     }
 
+    /* =====================================================
+       ROOT CAUSE ANALYSIS REQUEST
+       ===================================================== */
+
+    private async handleRootCauseAnalysis(
+        rcaButton: HTMLButtonElement,
+        botContent: HTMLElement,
+        rcaData: any
+    ) {
+
+        const existingRca =
+            botContent.querySelector(
+                ".rca-section"
+            );
+
+        if (existingRca) {
+            return;
+        }
+
+        const originalText =
+            rcaButton.textContent ||
+            "Root Cause Analysis";
+
+        rcaButton.disabled =
+            true;
+
+        rcaButton.textContent =
+            "Analyzing...";
+
+        const loadingElement =
+            document.createElement(
+                "div"
+            );
+
+        loadingElement.className =
+            "rca-section";
+
+        loadingElement.innerHTML = `
+
+            <div class="rca-title">
+                Root Cause Analysis
+            </div>
+
+            <div
+                style="
+                    color: #0284c7;
+                    font-size: 11px;
+                "
+            >
+                Analyzing the returned evidence...
+            </div>
+
+        `;
+
+        botContent.appendChild(
+            loadingElement
+        );
+
+        const chatHistory =
+            this.container.querySelector(
+                "#chatHistory"
+            ) as HTMLElement;
+
+        chatHistory.scrollTop =
+            chatHistory.scrollHeight;
+
+        try {
+
+            await this.loadUserIdentity();
+
+            const requestPayload = {
+
+                question:
+                    rcaData.question,
+
+                sql:
+                    rcaData.sql || "",
+
+                columns:
+                    rcaData.columns || [],
+
+                rows:
+                    rcaData.rows || [],
+
+                pbi_context:
+                    this.pbiContext,
+
+                user_email:
+                    this.userEmail,
+
+                user_region:
+                    this.userRegion,
+
+                user_identity:
+                    this.userIdentity
+
+            };
+
+            const response =
+                await fetch(
+                    this.getRcaEndpoint(),
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                requestPayload
+                            )
+                    }
+                );
+
+            if (!response.ok) {
+
+                const errorText =
+                    await response.text();
+
+                throw new Error(
+                    `Server returned ${response.status}: ${errorText}`
+                );
+
+            }
+
+            const data =
+                await response.json();
+
+            loadingElement.remove();
+
+            this.renderRcaResponse(
+                botContent,
+                data
+            );
+
+            rcaButton.textContent =
+                "RCA Completed";
+
+            rcaButton.disabled =
+                true;
+
+            this.showToast(
+                "Root cause analysis completed",
+                "success"
+            );
+
+        } catch (error: any) {
+
+            loadingElement.innerHTML = `
+
+                <div class="rca-title">
+                    Root Cause Analysis
+                </div>
+
+                <div
+                    style="
+                        color: #dc2626;
+                        font-size: 11px;
+                        line-height: 1.5;
+                    "
+                >
+                    RCA failed: ${this.escapeHtml(
+                        error?.message ||
+                        "Unknown error"
+                    )}
+                </div>
+
+            `;
+
+            rcaButton.disabled =
+                false;
+
+            rcaButton.textContent =
+                originalText;
+
+            this.showToast(
+                "Root cause analysis failed",
+                "error"
+            );
+
+        }
+
+    }
+
+    /* =====================================================
+       RCA ENDPOINT
+       ===================================================== */
+
+    private getRcaEndpoint(): string {
+
+        if (
+            CHAT_ENDPOINT.endsWith(
+                "/chat"
+            )
+        ) {
+
+            return CHAT_ENDPOINT.slice(
+                0,
+                -"/chat".length
+            ) + "/rca";
+
+        }
+
+        return CHAT_ENDPOINT.replace(
+            /\/$/,
+            ""
+        ) + "/rca";
+
+    }
+
+    /* =====================================================
+       RCA RESPONSE RENDERING
+       ===================================================== */
+
+    private renderRcaResponse(
+        botContent: HTMLElement,
+        data: any
+    ) {
+
+        const section =
+            document.createElement(
+                "div"
+            );
+
+        section.className =
+            "rca-section";
+
+        const summary =
+            typeof data.summary === "string"
+                ? data.summary
+                : "";
+
+        const primaryDrivers =
+            Array.isArray(
+                data.primary_drivers
+            )
+                ? data.primary_drivers
+                : [];
+
+        const secondaryDrivers =
+            Array.isArray(
+                data.secondary_drivers
+            )
+                ? data.secondary_drivers
+                : [];
+
+        const recommendations =
+            Array.isArray(
+                data.recommendations
+            )
+                ? data.recommendations
+                : [];
+
+        const confidenceCaveats =
+            Array.isArray(
+                data.confidence_caveats
+            )
+                ? data.confidence_caveats
+                : [];
+
+        section.innerHTML = `
+
+            <div class="rca-title">
+                Root Cause Analysis
+            </div>
+
+            ${
+                summary
+                    ? `
+                        <div class="rca-summary">
+                            ${this.escapeHtml(summary)}
+                        </div>
+                    `
+                    : ""
+            }
+
+            ${
+                primaryDrivers.length > 0
+                    ? `
+                        <div class="rca-subtitle">
+                            Primary Drivers
+                        </div>
+
+                        ${primaryDrivers
+                            .map(
+                                (driver: any) =>
+                                    this.renderRcaDriver(
+                                        driver
+                                    )
+                            )
+                            .join("")}
+                    `
+                    : `
+                        <div class="rca-subtitle">
+                            Primary Drivers
+                        </div>
+
+                        <div
+                            style="
+                                font-size: 10px;
+                                color: #64748b;
+                            "
+                        >
+                            No directly supported primary driver was identified.
+                        </div>
+                    `
+            }
+
+            ${
+                secondaryDrivers.length > 0
+                    ? `
+                        <div class="rca-subtitle">
+                            Secondary Drivers
+                        </div>
+
+                        ${secondaryDrivers
+                            .map(
+                                (driver: any) =>
+                                    this.renderRcaDriver(
+                                        driver
+                                    )
+                            )
+                            .join("")}
+                    `
+                    : ""
+            }
+
+            ${
+                recommendations.length > 0
+                    ? `
+                        <div class="rca-subtitle">
+                            Recommendations
+                        </div>
+
+                        <ul class="rca-list">
+
+                            ${recommendations
+                                .map(
+                                    (item: any) =>
+                                        `
+                                            <li>
+                                                ${this.escapeHtml(
+                                                    String(item)
+                                                )}
+                                            </li>
+                                        `
+                                )
+                                .join("")}
+
+                        </ul>
+                    `
+                    : ""
+            }
+
+            ${
+                confidenceCaveats.length > 0
+                    ? `
+                        <div class="rca-subtitle">
+                            Confidence & Caveats
+                        </div>
+
+                        ${confidenceCaveats
+                            .map(
+                                (item: any) =>
+                                    `
+                                        <div class="rca-caveat">
+                                            ${this.escapeHtml(
+                                                String(item)
+                                            )}
+                                        </div>
+                                    `
+                            )
+                            .join("")}
+                    `
+                    : ""
+            }
+
+            <div
+                style="
+                    font-size: 9px;
+                    color: #94a3b8;
+                    margin-top: 10px;
+                "
+            >
+                RCA generated from the authorized query result
+                using Snowflake AI_COMPLETE.
+            </div>
+
+        `;
+
+        botContent.appendChild(
+            section
+        );
+
+        const chatHistory =
+            this.container.querySelector(
+                "#chatHistory"
+            ) as HTMLElement;
+
+        chatHistory.scrollTop =
+            chatHistory.scrollHeight;
+
+    }
+
+    /* =====================================================
+       RCA DRIVER RENDERING
+       ===================================================== */
+
+    private renderRcaDriver(
+        driver: any
+    ): string {
+
+        const dimension =
+            driver?.dimension
+                ? String(driver.dimension)
+                : "Dimension";
+
+        const driverName =
+            driver?.driver
+                ? String(driver.driver)
+                : "Driver";
+
+        const evidence =
+            driver?.evidence
+                ? String(driver.evidence)
+                : "";
+
+        const impact =
+            driver?.impact
+                ? String(driver.impact)
+                : "";
+
+        const confidence =
+            driver?.confidence
+                ? String(driver.confidence)
+                : "Low";
+
+        const confidenceLower =
+            confidence.toLowerCase();
+
+        let confidenceClass =
+            "rca-confidence-low";
+
+        if (
+            confidenceLower ===
+            "high"
+        ) {
+
+            confidenceClass =
+                "rca-confidence-high";
+
+        } else if (
+            confidenceLower ===
+            "medium"
+        ) {
+
+            confidenceClass =
+                "rca-confidence-medium";
+
+        }
+
+        return `
+
+            <div class="rca-driver">
+
+                <div class="rca-driver-header">
+
+                    <div>
+
+                        <div
+                            class="rca-driver-name"
+                        >
+                            ${this.escapeHtml(
+                                driverName
+                            )}
+                        </div>
+
+                        <div
+                            style="
+                                font-size: 9px;
+                                color: #64748b;
+                                margin-top: 2px;
+                            "
+                        >
+                            ${this.escapeHtml(
+                                dimension
+                            )}
+                        </div>
+
+                    </div>
+
+                    <span
+                        class="
+                            rca-confidence
+                            ${confidenceClass}
+                        "
+                    >
+                        ${this.escapeHtml(
+                            confidence
+                        )}
+                    </span>
+
+                </div>
+
+                ${
+                    evidence
+                        ? `
+                            <div
+                                class="rca-driver-row"
+                            >
+                                <span
+                                    class="rca-driver-label"
+                                >
+                                    Evidence:
+                                </span>
+
+                                ${this.escapeHtml(
+                                    evidence
+                                )}
+                            </div>
+                        `
+                        : ""
+                }
+
+                ${
+                    impact
+                        ? `
+                            <div
+                                class="rca-driver-row"
+                            >
+                                <span
+                                    class="rca-driver-label"
+                                >
+                                    Impact:
+                                </span>
+
+                                ${this.escapeHtml(
+                                    impact
+                                )}
+                            </div>
+                        `
+                        : ""
+                }
+
+            </div>
+
+        `;
+
+    }
+
+    /* =====================================================
+       RESPONSE RENDERING
+       ===================================================== */
 
     private renderResponse(
         botBubble: HTMLElement,
@@ -1554,13 +2651,7 @@ export class App {
                 "#chatHistory"
             ) as HTMLElement;
 
-
         let tableHtml = "";
-
-
-        /* ==============================
-           DATA TABLE
-           ============================== */
 
         if (
             data.columns &&
@@ -1575,7 +2666,6 @@ export class App {
                             `<th>${this.escapeHtml(col)}</th>`
                     )
                     .join("");
-
 
             const rowsHtml =
                 data.rows
@@ -1600,7 +2690,6 @@ export class App {
                                     )
                                     .join("");
 
-
                             return `
                                 <tr>
 
@@ -1621,7 +2710,6 @@ export class App {
                         }
                     )
                     .join("");
-
 
             tableHtml = `
 
@@ -1677,21 +2765,14 @@ export class App {
 
         }
 
-
-        /* ==============================
-           RESPONSE
-           ============================== */
-
         const botContent =
             botBubble.querySelector(
                 ".bot-content"
             ) as HTMLElement;
 
-
         if (!botContent) {
             return;
         }
-
 
         const csvText =
             this.buildCsvContent(
@@ -1714,16 +2795,36 @@ export class App {
         (botContent as any).__sqlText =
             data.sql || "";
 
+        (botContent as any).__rcaData = {
+
+            question:
+                data.question ||
+                this.getQuestionFromResponse(
+                    botBubble
+                ),
+
+            sql:
+                data.sql || "",
+
+            columns:
+                data.columns || [],
+
+            rows:
+                data.rows || []
+
+        };
 
         botContent.style.color =
             "#334155";
 
-
         const followUpQuestions =
-            Array.isArray(data.follow_up_questions)
+            Array.isArray(
+                data.follow_up_questions
+            )
                 ? data.follow_up_questions.filter(
                       (q: any) =>
-                          typeof q === "string" && q.trim()
+                          typeof q === "string" &&
+                          q.trim()
                   )
                 : [];
 
@@ -1731,10 +2832,13 @@ export class App {
             followUpQuestions.length > 0
                 ? `
                     <div class="follow-up-section">
+
                         <div class="follow-up-title">
                             Follow-up questions
                         </div>
+
                         <div class="follow-up-list">
+
                             ${followUpQuestions
                                 .map(
                                     q => `
@@ -1751,7 +2855,9 @@ export class App {
                                     `
                                 )
                                 .join("")}
+
                         </div>
+
                     </div>
                 `
                 : "";
@@ -1763,6 +2869,18 @@ export class App {
             </div>
 
             ${tableHtml}
+
+            <div class="rca-action-container">
+
+                <button
+                    class="rca-btn"
+                    data-action="root-cause-analysis"
+                    type="button"
+                >
+                    ✦ Root Cause Analysis
+                </button>
+
+            </div>
 
             ${followUpHtml}
 
@@ -1790,6 +2908,7 @@ export class App {
                                     margin-top: 8px;
                                 "
                             >
+
                                 <button
                                     class="copy-sql-btn"
                                     data-action="copy-sql"
@@ -1797,6 +2916,7 @@ export class App {
                                 >
                                     Copy SQL
                                 </button>
+
                             </div>
 
                             <pre
@@ -1809,15 +2929,9 @@ export class App {
                                     font-size: 11px;
                                     margin-top: 6px;
                                 "
-                            >
-
-                                <code>
-                                    ${this.escapeHtml(
-                                        data.sql
-                                    )}
-                                </code>
-
-                            </pre>
+                            ><code>${this.escapeHtml(
+                                data.sql
+                            )}</code></pre>
 
                         </details>
 
@@ -1846,12 +2960,95 @@ export class App {
 
         `;
 
+        /*
+         * Re-attach RCA data because innerHTML above replaced
+         * the previous DOM contents.
+         */
+
+        (botContent as any).__rcaData = {
+
+            question:
+                data.question ||
+                this.getQuestionFromResponse(
+                    botBubble
+                ),
+
+            sql:
+                data.sql || "",
+
+            columns:
+                data.columns || [],
+
+            rows:
+                data.rows || []
+
+        };
 
         chatHistory.scrollTop =
             chatHistory.scrollHeight;
 
     }
 
+    /* =====================================================
+       GET QUESTION FROM RESPONSE
+       ===================================================== */
+
+    private getQuestionFromResponse(
+        botBubble: HTMLElement
+    ): string {
+
+        const chatHistory =
+            this.container.querySelector(
+                "#chatHistory"
+            ) as HTMLElement;
+
+        const bubbles =
+            Array.from(
+                chatHistory.children
+            );
+
+        const currentIndex =
+            bubbles.indexOf(
+                botBubble
+            );
+
+        if (
+            currentIndex > 0
+        ) {
+
+            for (
+                let i = currentIndex - 1;
+                i >= 0;
+                i--
+            ) {
+
+                const element =
+                    bubbles[i] as HTMLElement;
+
+                if (
+                    element.classList.contains(
+                        "user-message"
+                    )
+                ) {
+
+                    return (
+                        element.textContent ||
+                        ""
+                    );
+
+                }
+
+            }
+
+        }
+
+        return "";
+
+    }
+
+    /* =====================================================
+       TOAST
+       ===================================================== */
 
     private showToast(
         message: string,
@@ -1884,14 +3081,25 @@ export class App {
 
         setTimeout(
             () => {
-                toast.classList.add("toast-notification-fade-out");
-                setTimeout(() => toast.remove(), 200);
+
+                toast.classList.add(
+                    "toast-notification-fade-out"
+                );
+
+                setTimeout(
+                    () => toast.remove(),
+                    200
+                );
+
             },
             2200
         );
 
     }
 
+    /* =====================================================
+       CSV
+       ===================================================== */
 
     private buildCsvContent(
         columns: string[],
@@ -1939,8 +3147,12 @@ export class App {
         );
 
         return "\uFEFF" + csvRows.join("\r\n");
+
     }
 
+    /* =====================================================
+       CLIPBOARD
+       ===================================================== */
 
     private async copyTextToClipboard(
         text: string
@@ -1972,7 +3184,6 @@ export class App {
 
             }
 
-
             const textArea =
                 document.createElement(
                     "textarea"
@@ -2003,7 +3214,9 @@ export class App {
             );
 
             textArea.focus();
+
             textArea.select();
+
             textArea.setSelectionRange(
                 0,
                 textArea.value.length
@@ -2046,10 +3259,9 @@ export class App {
 
     }
 
-
-    /* ==============================
+    /* =====================================================
        DOWNLOAD CSV
-       ============================== */
+       ===================================================== */
 
     private async downloadCsv(
         columns: string[],
@@ -2058,7 +3270,9 @@ export class App {
 
         try {
 
-            console.log("Starting Power BI CSV download...");
+            console.log(
+                "Starting Power BI CSV download..."
+            );
 
             const csvContent =
                 this.buildCsvContent(
@@ -2067,16 +3281,14 @@ export class App {
                 );
 
             if (!csvContent) {
-                console.error("CSV content is empty");
-                return false;
-            }
 
-            /*
-            * Power BI Custom Visual File Download API
-            *
-            * This is the supported way to download files
-            * from a custom visual.
-            */
+                console.error(
+                    "CSV content is empty"
+                );
+
+                return false;
+
+            }
 
             if (!this.host.downloadService) {
 
@@ -2090,13 +3302,8 @@ export class App {
                 );
 
                 return false;
+
             }
-
-
-            /*
-            * Check whether Power BI allows this visual
-            * to download files.
-            */
 
             try {
 
@@ -2124,6 +3331,7 @@ export class App {
                     );
 
                     return false;
+
                 }
 
             } catch (statusError) {
@@ -2135,21 +3343,8 @@ export class App {
 
             }
 
-
             const fileName =
                 `cortex_analyst_result_${this.getTimestamp()}.csv`;
-
-
-            /*
-            * IMPORTANT:
-            *
-            * For CSV the content is passed directly as text.
-            *
-            * Do NOT create a Blob.
-            * Do NOT create an object URL.
-            * Do NOT use window.open().
-            * Do NOT manually click an <a>.
-            */
 
             const result =
                 await this.host.downloadService.exportVisualsContent(
@@ -2159,12 +3354,10 @@ export class App {
                     "Cortex Analyst query result"
                 );
 
-
             console.log(
                 "Power BI download result:",
                 result
             );
-
 
             if (result) {
 
@@ -2174,8 +3367,8 @@ export class App {
                 );
 
                 return true;
-            }
 
+            }
 
             this.showToast(
                 "Power BI could not download the CSV",
@@ -2183,7 +3376,6 @@ export class App {
             );
 
             return false;
-
 
         } catch (error: any) {
 
@@ -2199,14 +3391,14 @@ export class App {
             );
 
             return false;
+
         }
 
     }
 
-
-    /* ==============================
-       CSV ESCAPING
-       ============================== */
+    /* =====================================================
+       ESCAPE CSV
+       ===================================================== */
 
     private escapeCsvValue(
         value: string
@@ -2226,21 +3418,19 @@ export class App {
 
         }
 
-
         return value;
 
     }
 
-
-    /* ==============================
-       HTML ESCAPING
-       ============================== */
+    /* =====================================================
+       ESCAPE HTML
+       ===================================================== */
 
     private escapeHtml(
         value: string
     ): string {
 
-        return value
+        return String(value)
             .replace(
                 /&/g,
                 "&amp;"
@@ -2264,16 +3454,14 @@ export class App {
 
     }
 
-
-    /* ==============================
+    /* =====================================================
        TIMESTAMP
-       ============================== */
+       ===================================================== */
 
     private getTimestamp(): string {
 
         const now =
             new Date();
-
 
         return now
             .toISOString()

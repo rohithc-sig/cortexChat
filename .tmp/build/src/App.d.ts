@@ -7,6 +7,7 @@ export declare class App {
     private userEmail?;
     private userRegion?;
     private userIdentity;
+    private interactionStarted;
     constructor(container: HTMLElement, host: VisualHost);
     private loadUserIdentity;
     setContext(context: any): void;
@@ -14,8 +15,15 @@ export declare class App {
     setUserRegion(userRegion?: string): void;
     private renderBaseUI;
     private attachEvents;
+    private startInteraction;
+    private returnToWelcome;
     private handleAskQuery;
+    private handleRootCauseAnalysis;
+    private getRcaEndpoint;
+    private renderRcaResponse;
+    private renderRcaDriver;
     private renderResponse;
+    private getQuestionFromResponse;
     private showToast;
     private buildCsvContent;
     private copyTextToClipboard;
