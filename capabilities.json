@@ -47,6 +47,7 @@
       "essential": true,
       "parameters": [
         "https://cortexbackend.onrender.com",
+        "https://cortex-backend-poc-ccd5g2e4evbxgafp.canadacentral-01.azurewebsites.net",
         "http://localhost:8000"
       ]
     },

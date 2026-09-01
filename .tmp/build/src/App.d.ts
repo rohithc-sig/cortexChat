@@ -18,12 +18,12 @@ export declare class App {
     private startInteraction;
     private returnToWelcome;
     private handleAskQuery;
-    private handleRootCauseAnalysis;
-    private getRcaEndpoint;
-    private renderRcaResponse;
-    private renderRcaDriver;
     private renderResponse;
-    private getQuestionFromResponse;
+    private getRcaFromResponse;
+    private buildRcaHtml;
+    private renderRcaDriver;
+    private buildRcaInsufficientHtml;
+    private buildRcaFailedHtml;
     private showToast;
     private buildCsvContent;
     private copyTextToClipboard;
